@@ -18,6 +18,8 @@
 package org.pentaho.platform.engine.services.connection.datasource.dbcp;
 
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.fail;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.when;
@@ -25,6 +27,7 @@ import static org.mockito.Mockito.when;
 import javax.sql.DataSource;
 
 import org.junit.Test;
+import org.pentaho.platform.api.data.DBDatasourceServiceException;
 import org.pentaho.database.model.IDatabaseConnection;
 import org.pentaho.platform.engine.services.MockDataSourceService;
 
@@ -43,4 +46,56 @@ public class DynamicallyPooledDatasourceSystemListenerTest {
     assertNotNull( ds );
   }
 
+  @Test
+  public void testRuntimeException() throws Exception {
+    DataSource ds = null;
+    IDatabaseConnection connection = mock( IDatabaseConnection.class );
+    when( connection.getName() ).thenReturn( CONNECTION_NAME );
+
+    DynamicallyPooledDatasourceSystemListener listener = spy( new DynamicallyPooledDatasourceSystemListener() );
+    MockDataSourceService mockDS = spy( new MockDataSourceService( false ) );
+
+    when( mockDS.getDataSource( connection.getName() ) ).thenThrow( new RuntimeException() );
+    when( listener.getDatasourceService() ).thenReturn( mockDS );
+
+    ds = listener.getDataSource( connection );
+    assertNull( ds );
+  }
+  
+  @Test
+  public void testDBDatasourceServiceException() throws Exception {
+    DataSource ds = null;
+    IDatabaseConnection connection = mock( IDatabaseConnection.class );
+    when( connection.getName() ).thenReturn( CONNECTION_NAME );
+
+    DynamicallyPooledDatasourceSystemListener listener = spy( new DynamicallyPooledDatasourceSystemListener() );
+    MockDataSourceService mockDS = spy( new MockDataSourceService( false ) );
+
+    when( mockDS.getDataSource( connection.getName() ) ).thenThrow( new DBDatasourceServiceException() );
+    when( listener.getDatasourceService() ).thenReturn( mockDS );
+
+    ds = listener.getDataSource( connection );
+    assertNull( ds );
+  }
+
+  @Test
+  public void testOtherException() throws Exception {
+    DataSource ds = null;
+    IDatabaseConnection connection = mock( IDatabaseConnection.class );
+    when( connection.getName() ).thenReturn( CONNECTION_NAME );
+
+    DynamicallyPooledDatasourceSystemListener listener = spy( new DynamicallyPooledDatasourceSystemListener() );
+    MockDataSourceService mockDS = spy( new MockDataSourceService( false ) );
+
+    when( mockDS.getDataSource( connection.getName() ) ).thenThrow( new NullPointerException() );
+    when( listener.getDatasourceService() ).thenReturn( mockDS );
+
+    try {
+      ds = listener.getDataSource( connection );
+    } catch ( NullPointerException e ) {
+    } catch ( Exception e ) {
+      e.printStackTrace();
+    }
+    assertNull( ds );
+  }
 }
