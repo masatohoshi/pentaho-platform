@@ -47,44 +47,55 @@ public class DynamicallyPooledDatasourceSystemListenerTest {
   }
 
   @Test
-  public void testRuntimeException() {
+  public void testRuntimeException() throws Exception {
+    DataSource ds = null;
     IDatabaseConnection connection = mock( IDatabaseConnection.class );
     when( connection.getName() ).thenReturn( CONNECTION_NAME );
 
     DynamicallyPooledDatasourceSystemListener listener = spy( new DynamicallyPooledDatasourceSystemListener() );
     MockDataSourceService mockDS = spy( new MockDataSourceService( false ) );
-    try {
-      when( mockDS.getDataSource( connection.getName() ) ).thenThrow( new RuntimeException() );
-    } catch ( DBDatasourceServiceException e ) {
-      e.printStackTrace();
-    }
+
+    when( mockDS.getDataSource( connection.getName() ) ).thenThrow( new RuntimeException() );
     when( listener.getDatasourceService() ).thenReturn( mockDS );
 
-    DataSource ds = listener.getDataSource( connection );
+    ds = listener.getDataSource( connection );
+    assertNull( ds );
+  }
+  
+  @Test
+  public void testDBDatasourceServiceException() throws Exception {
+    DataSource ds = null;
+    IDatabaseConnection connection = mock( IDatabaseConnection.class );
+    when( connection.getName() ).thenReturn( CONNECTION_NAME );
+
+    DynamicallyPooledDatasourceSystemListener listener = spy( new DynamicallyPooledDatasourceSystemListener() );
+    MockDataSourceService mockDS = spy( new MockDataSourceService( false ) );
+
+    when( mockDS.getDataSource( connection.getName() ) ).thenThrow( new DBDatasourceServiceException() );
+    when( listener.getDatasourceService() ).thenReturn( mockDS );
+
+    ds = listener.getDataSource( connection );
     assertNull( ds );
   }
 
   @Test
-  public void testOtherException() {
+  public void testOtherException() throws Exception {
+    DataSource ds = null;
     IDatabaseConnection connection = mock( IDatabaseConnection.class );
     when( connection.getName() ).thenReturn( CONNECTION_NAME );
 
     DynamicallyPooledDatasourceSystemListener listener = spy( new DynamicallyPooledDatasourceSystemListener() );
     MockDataSourceService mockDS = spy( new MockDataSourceService( false ) );
-    try {
-      when( mockDS.getDataSource( connection.getName() ) ).thenThrow( new NullPointerException() );
-    } catch ( DBDatasourceServiceException e ) {
-      e.printStackTrace();
-    }
+
+    when( mockDS.getDataSource( connection.getName() ) ).thenThrow( new NullPointerException() );
     when( listener.getDatasourceService() ).thenReturn( mockDS );
 
     try {
-      DataSource ds = listener.getDataSource( connection );
-      fail();
+      ds = listener.getDataSource( connection );
     } catch ( NullPointerException e ) {
-
     } catch ( Exception e ) {
       e.printStackTrace();
     }
+    assertNull( ds );
   }
 }
