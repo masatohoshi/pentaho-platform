@@ -46,8 +46,6 @@ public class DynamicallyPooledDatasourceSystemListenerTest {
     assertNotNull( ds );
   }
 
-  // 05/11/2017
-  // add Ikuma Tani
   @Test
   public void testRuntimeException() {
     IDatabaseConnection connection = mock( IDatabaseConnection.class );
@@ -66,8 +64,6 @@ public class DynamicallyPooledDatasourceSystemListenerTest {
     assertNull( ds );
   }
 
-  // 05/11/2017
-  // add Ikuma Tani
   @Test
   public void testOtherException() {
     IDatabaseConnection connection = mock( IDatabaseConnection.class );
@@ -86,7 +82,7 @@ public class DynamicallyPooledDatasourceSystemListenerTest {
       DataSource ds = listener.getDataSource( connection );
       fail();
     } catch ( NullPointerException e ) {
-      
+
     } catch ( Exception e ) {
       e.printStackTrace();
     }
