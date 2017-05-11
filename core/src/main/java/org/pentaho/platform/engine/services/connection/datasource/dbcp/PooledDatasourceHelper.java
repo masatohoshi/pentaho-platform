@@ -13,7 +13,7 @@
  * See the GNU General Public License for more details.
  *
  *
- * Copyright 2006 - 2016 Pentaho Corporation.  All rights reserved.
+ * Copyright 2006 - 2017 Pentaho Corporation.  All rights reserved.
  */
 
 package org.pentaho.platform.engine.services.connection.datasource.dbcp;
@@ -163,7 +163,7 @@ public class PooledDatasourceHelper {
       poolingDataSource = new PoolingDataSource();
       if ( dialect instanceof IDriverLocator ) {
         if ( !( (IDriverLocator) dialect ).initialize( driverClass ) ) {
-          throw new RuntimeException( Messages.getInstance()
+          throw new DriverInitializeFailedException( Messages.getInstance()
             .getErrorString( "PooledDatasourceHelper.ERROR_0009_UNABLE_TO_POOL_DATASOURCE_CANT_INITIALIZE",
               databaseConnection.getName(), driverClass ) );
         }
@@ -376,13 +376,14 @@ public class PooledDatasourceHelper {
    * initialize() implementation.  For all others, will initialize drivers via the call to
    * {@link DriverManagerDataSource#setDriverClassName(String)} (which internally uses Class.forName())
    * @throws DBDatasourceServiceException
+   * @throws DriverInitializeFailedException
    */
   private static void initDriverClass( DriverManagerDataSource driverManagerDataSource, IDatabaseDialect dialect,
                                        String driverClassName,
                                        String databaseConnectionName ) throws DBDatasourceServiceException {
     if ( dialect instanceof IDriverLocator ) {
       if ( !( (IDriverLocator) dialect ).initialize( driverClassName ) ) {
-        throw new RuntimeException( Messages.getInstance()
+        throw new DriverInitializeFailedException( Messages.getInstance()
           .getErrorString( "PooledDatasourceHelper.ERROR_0009_UNABLE_TO_POOL_DATASOURCE_CANT_INITIALIZE",
             databaseConnectionName, driverClassName ) );
       }

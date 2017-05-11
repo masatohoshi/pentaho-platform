@@ -57,21 +57,21 @@ import com.google.common.collect.ImmutableMap;
 @RunWith( MockitoJUnitRunner.class )
 public class PooledDatasourceHelperTest {
   private static final String SOLUTION_PATH = "src/test/resources/solution";
-  private MicroPlatform       mp;
+  private MicroPlatform mp;
 
   @Mock( extraInterfaces = { IDriverLocator.class } )
-  private IDatabaseDialect        driverLocatorDialect;
+  private IDatabaseDialect driverLocatorDialect;
   @Mock
-  private IDatabaseDialect        plainDialect;
+  private IDatabaseDialect plainDialect;
   @Mock
-  private IDatabaseConnection     connection;
+  private IDatabaseConnection connection;
   @Mock
   private IDatabaseDialectService dialectService;
   @Mock
-  private IDatabaseType           databaseType;
+  private IDatabaseType databaseType;
 
   private final String nativeDriverName = "some.native.driver";
-  private final String jdbcUrl          = "jdbc:some://server:port";
+  private final String jdbcUrl = "jdbc:some://server:port";
 
   @Before
   public void before() throws DatabaseDialectException {
@@ -289,6 +289,13 @@ public class PooledDatasourceHelperTest {
     } catch ( Exception e ) {
       assertThat( e, instanceOf( DBDatasourceServiceException.class ) );
     }
+  }
+
+  @Test( expected = DriverNotInitializedException.class )
+  public void testDriverNotInitializedException() throws DBDatasourceServiceException {
+    when( dialectService.getDialect( connection ) ).thenReturn( driverLocatorDialect );
+    when( ( (IDriverLocator) driverLocatorDialect ).initialize( nativeDriverName ) ).thenReturn( false );
+    PooledDatasourceHelper.convert( connection, () -> dialectService );
   }
 
   @After
