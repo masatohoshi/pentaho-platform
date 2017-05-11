@@ -18,6 +18,8 @@
 package org.pentaho.platform.engine.services.connection.datasource.dbcp;
 
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.fail;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.when;
@@ -25,6 +27,7 @@ import static org.mockito.Mockito.when;
 import javax.sql.DataSource;
 
 import org.junit.Test;
+import org.pentaho.platform.api.data.DBDatasourceServiceException;
 import org.pentaho.database.model.IDatabaseConnection;
 import org.pentaho.platform.engine.services.MockDataSourceService;
 
@@ -43,4 +46,49 @@ public class DynamicallyPooledDatasourceSystemListenerTest {
     assertNotNull( ds );
   }
 
+  // 05/11/2017
+  // add Ikuma Tani
+  @Test
+  public void testRuntimeException() {
+    IDatabaseConnection connection = mock( IDatabaseConnection.class );
+    when( connection.getName() ).thenReturn( CONNECTION_NAME );
+
+    DynamicallyPooledDatasourceSystemListener listener = spy( new DynamicallyPooledDatasourceSystemListener() );
+    MockDataSourceService mockDS = spy( new MockDataSourceService( false ) );
+    try {
+      when( mockDS.getDataSource( connection.getName() ) ).thenThrow( new RuntimeException() );
+    } catch ( DBDatasourceServiceException e ) {
+      e.printStackTrace();
+    }
+    when( listener.getDatasourceService() ).thenReturn( mockDS );
+
+    DataSource ds = listener.getDataSource( connection );
+    assertNull( ds );
+  }
+
+  // 05/11/2017
+  // add Ikuma Tani
+  @Test
+  public void testOtherException() {
+    IDatabaseConnection connection = mock( IDatabaseConnection.class );
+    when( connection.getName() ).thenReturn( CONNECTION_NAME );
+
+    DynamicallyPooledDatasourceSystemListener listener = spy( new DynamicallyPooledDatasourceSystemListener() );
+    MockDataSourceService mockDS = spy( new MockDataSourceService( false ) );
+    try {
+      when( mockDS.getDataSource( connection.getName() ) ).thenThrow( new NullPointerException() );
+    } catch ( DBDatasourceServiceException e ) {
+      e.printStackTrace();
+    }
+    when( listener.getDatasourceService() ).thenReturn( mockDS );
+
+    try {
+      DataSource ds = listener.getDataSource( connection );
+      fail();
+    } catch ( NullPointerException e ) {
+      
+    } catch ( Exception e ) {
+      e.printStackTrace();
+    }
+  }
 }
